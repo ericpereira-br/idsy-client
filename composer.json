@@ -1,0 +1,21 @@
+{
+    "name": "idsy/client",
+    "description": "Package para facilitar o acesso a API da IDSY",
+    "type": "library",    
+	"license": "MIT",
+    "authors": [
+        {
+            "name": "ERIC PEREIRA",
+            "email": "eric.pereira.swp@outlook.com"
+        }
+    ],	
+    "autoload": {
+        "psr-4": {
+            "Idsy\\Client\\": "src/"
+        }
+    },
+    "require": {
+        "php": ">=8.0",
+		"idsy/tools": "^1.0"        
+    }
+}
