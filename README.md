@@ -18,7 +18,7 @@ Composer
 
 Via Composer:
 
-composer require ericpereira-br/idsy-client
+composer require idsy-client
 
 🔧 Como usar
 🔹 No diretório test tem os exemplos
@@ -28,7 +28,7 @@ src/
  ├── Http
  ├── Model
  ├── Services
- 
+
  test/
  ├── Login.php
  ├── PixSincronizar.php
