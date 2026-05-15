@@ -2,13 +2,13 @@
 
 include_once "../vendor/autoload.php";
 
-use Idsy\Client\Services\Control\Login; 
+use Idsy\Client\Control\Login;
 
 // login
 $login = new Login();
 $login->request->setURL('http://localhost:8080/idsy-api/public_html/index.php');
-$login->setLogin('test');
-$login->setPassword('1234');
+$login->setLogin('worker');
+$login->setPassword('123456');
 $login->setTeam('control');
 $login->setKey('3099195');
 $login->get();

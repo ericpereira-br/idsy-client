@@ -1,5 +1,5 @@
-<?php // versão 01;   
-namespace Idsy\Client\Services\Financeiro;
+<?php
+namespace Idsy\Client\Financeiro;
 
 use Idsy\Client\Http\Request;
 
@@ -19,12 +19,12 @@ class PixSincronizar
     }
 
     public function post(string $authenticationData): void
-    {   
+    {
         $this->request->setController('FINANCEIRO_PIX_SINCRONIZAR');
         $this->request->setPublicDataType('json');
-        $this->request->setAuthenticationDataType('text');  
-        $this->request->setAuthenticationData($authenticationData);        
-        $this->request->setPrivateDataType('json');  
-        $this->request->post();        
+        $this->request->setAuthenticationDataType('text');
+        $this->request->setAuthenticationData($authenticationData);
+        $this->request->setPrivateDataType('json');
+        $this->request->post();
     }
 }

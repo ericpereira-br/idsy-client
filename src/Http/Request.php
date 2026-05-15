@@ -1,116 +1,143 @@
-<?php // versão 01;   
-namespace Idsy\Client\http;
+<?php
+namespace Idsy\Client\Http;
 
-use Idsy\Client\Model\Http\Request as RequestModel;
-
-class Request extends RequestModel
+class Request
 {
-    // public RequestModel $model;
+    private string $url;
+    private string $controller;
+    private string $device;
+    private string $publicData;
+    private string $publicDataType;
+    private string $privateData;
+    private string $privateDataType;
+    private string $authenticationData;
+    private string $authenticationDataType;
+    private string $result;
+    private int $resultCode;
 
     public function __construct()
     {
-        parent::__construct();
+        $this->toClear();
     }
 
     public function toClear(): void
     {
-        parent::toClear();
+        $this->url                    = '';
+        $this->controller             = '';
+        $this->device                 = '';
+        $this->publicData             = '';
+        $this->publicDataType         = '';
+        $this->privateData            = '';
+        $this->privateDataType        = '';
+        $this->authenticationData     = '';
+        $this->authenticationDataType = '';
+        $this->result                 = '';
+        $this->resultCode             = 0;
     }
 
-    private function getHearders(): array
+    public function getURL(): string                        { return $this->url; }
+    public function setURL(string $value): void             { $this->url = $value; }
+
+    public function getController(): string                 { return $this->controller; }
+    public function setController(string $value): void      { $this->controller = $value; }
+
+    public function getDevice(): string                     { return $this->device; }
+    public function setDevice(string $value): void          { $this->device = $value; }
+
+    public function getPublicData(): string                 { return $this->publicData; }
+    public function setPublicData(string $value): void      { $this->publicData = $value; }
+
+    public function getPublicDataType(): string             { return $this->publicDataType; }
+    public function setPublicDataType(string $value): void  { $this->publicDataType = $value; }
+
+    public function getPrivateData(): string                { return $this->privateData; }
+    public function setPrivateData(string $value): void     { $this->privateData = $value; }
+
+    public function getPrivateDataType(): string            { return $this->privateDataType; }
+    public function setPrivateDataType(string $value): void { $this->privateDataType = substr($value, 0, 10); }
+
+    public function getAuthenticationData(): string                        { return $this->authenticationData; }
+    public function setAuthenticationData(string $value): void             { $this->authenticationData = $value; }
+
+    public function getAuthenticationDataType(): string                    { return $this->authenticationDataType; }
+    public function setAuthenticationDataType(string $value): void         { $this->authenticationDataType = $value; }
+
+    public function getResult(): string                     { return $this->result; }
+    public function setResult(string $value): void          { $this->result = $value; }
+
+    public function getResultCode(): int                    { return $this->resultCode; }
+    public function setResultCode(int $value): void         { $this->resultCode = $value; }
+
+    private function getHeaders(): array
     {
-        $headers = [
+        return [
             'Accept: application/json',
-            'controller: ' . parent::getController(),
-            'public-data-type: ' . parent::getPublicDataType(),
-            'private-data-type: ' . parent::getPrivateDataType(),
-            'authentication-data-type: ' . parent::getAuthenticationDataType(),
-            'authentication-data: ' . parent::getAuthenticationData(),
-            'device: ' . parent::getDevice()
+            'controller: ' . $this->controller,
+            'public-data-type: ' . $this->publicDataType,
+            'private-data-type: ' . $this->privateDataType,
+            'authentication-data-type: ' . $this->authenticationDataType,
+            'authentication-data: ' . $this->authenticationData,
+            'device: ' . $this->device,
         ];
-        return $headers;
     }
 
     public function post(): void
-    {       
-        $headers = $this->getHearders();
-        $body = parent::getPrivateData();
+    {
         $ch = curl_init();
 
         curl_setopt_array($ch, [
-            CURLOPT_URL            => parent::getUrl(),
+            CURLOPT_URL            => $this->url,
             CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POST           => true,
-            CURLOPT_HTTPHEADER     => array_merge($headers, [
-                'Connection: close'
-            ]),            
-            CURLOPT_POSTFIELDS     => $body,
+            CURLOPT_HTTPHEADER     => array_merge($this->getHeaders(), ['Connection: close']),
+            CURLOPT_POSTFIELDS     => $this->privateData,
             CURLOPT_TIMEOUT        => 30,
             CURLOPT_FORBID_REUSE   => true,
-            CURLOPT_FRESH_CONNECT  => true            
+            CURLOPT_FRESH_CONNECT  => true,
         ]);
 
         $response = curl_exec($ch);
 
         if ($response === false) {
-            $error = curl_error($ch);
-            curl_close($ch);
-            throw new \Exception($error);
-        }        
+            throw new \Exception(curl_error($ch));
+        }
 
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);        
-
-        parent::setResult($response);
-        parent::setResultCode($httpCode);        
-
-        curl_reset($ch);
-        curl_close($ch);        
+        $this->result     = $response;
+        $this->resultCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
     }
 
     public function get(): void
     {
-        $headers = $this->getHearders();
-
-        if (parent::getPublicData() != '') {
-            $get = '?' . parent::getPublicData();
-        } else {
-            $get = '';
-        }
-
-        $ch = curl_init();
-
-        curl_setopt_array($ch, [
-            CURLOPT_URL            => parent::getUrl() . $get,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_HTTPHEADER     => array_merge($headers, [
-                'Connection: close'
-            ]),            
-            CURLOPT_TIMEOUT        => 30,
-            CURLOPT_FORBID_REUSE   => true,
-            CURLOPT_FRESH_CONNECT  => true
-        ]);
+        $headers = $this->getHeaders();
 
         foreach ($headers as $h) {
             if (preg_match("/:\s*$/", $h)) {
                 throw new \Exception("Header inválido: [$h]");
             }
-        }        
+        }
+
+        $query = $this->publicData !== '' ? '?' . $this->publicData : '';
+
+        $ch = curl_init();
+
+        curl_setopt_array($ch, [
+            CURLOPT_URL            => $this->url . $query,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_HTTPHEADER     => array_merge($headers, ['Connection: close']),
+            CURLOPT_TIMEOUT        => 30,
+            CURLOPT_FORBID_REUSE   => true,
+            CURLOPT_FRESH_CONNECT  => true,
+        ]);
 
         $response = curl_exec($ch);
+        $error    = curl_error($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-        $error = curl_error($ch);        
 
         if ($error !== '') {
             throw new \Exception($error);
-        }        
-
-        if (curl_errno($ch)) {
-            throw new \Exception(curl_error($ch));
         }
 
-        parent::setResult($response);
-        parent::setResultCode($httpCode);        
-
-        curl_reset($ch);
+        $this->result     = $response;
+        $this->resultCode = $httpCode;
     }
 }
